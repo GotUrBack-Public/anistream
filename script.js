@@ -1,92 +1,125 @@
-// AniStream Hauptscript
+// ===============================
+// AniStream Script
+// ===============================
 
 
-// ==========================
+// ===============================
 // STARTSEITE
-// ==========================
+// ===============================
 
 
-const grid = document.getElementById("animeGrid");
+const animeGrid = document.getElementById("animeGrid");
 
 
-if(grid){
+if(animeGrid){
 
 
-    let shown = 0;
+    let displayed = 0;
+
+    const amount = 15;
 
 
-    function loadAnime(){
+
+    function showAnime(){
 
 
         if(typeof animeList === "undefined"){
+
+            console.log("anime.js wurde nicht geladen");
+
             return;
+
         }
 
 
 
-        animeList.slice(shown, shown + 15).forEach((anime,index)=>{
+
+        const items = animeList.slice(
+            displayed,
+            displayed + amount
+        );
 
 
-            let card = document.createElement("div");
+
+
+        items.forEach((anime,index)=>{
+
+
+            const card = document.createElement("div");
 
 
             card.className="card";
 
 
+
             card.innerHTML = `
 
-            <img src="${anime.cover}">
+                <img src="${anime.cover}" alt="${anime.name}">
 
-            <h3>${anime.name}</h3>
+                <h3>${anime.name}</h3>
 
             `;
 
 
 
-            card.onclick=function(){
+
+            card.addEventListener("click",()=>{
 
 
                 localStorage.setItem(
                     "selectedAnime",
-                    index
+                    displayed + index
                 );
+
 
 
                 window.location.href="anime.html";
 
 
-            };
+            });
 
 
-            grid.appendChild(card);
+
+
+            animeGrid.appendChild(card);
+
 
 
         });
 
 
 
-        shown +=15;
+
+        displayed += items.length;
+
 
 
     }
 
 
 
-    loadAnime();
+
+
+    showAnime();
 
 
 
-    const more =
+
+
+    const moreButton =
     document.getElementById("more");
 
 
 
-    if(more){
+    if(moreButton){
 
 
-        more.onclick=function(){
 
-            loadAnime();
+        moreButton.onclick=function(){
+
+
+            showAnime();
+
 
         };
 
@@ -95,129 +128,60 @@ if(grid){
 
 
 
-}
 
 
+    const search =
+    document.getElementById("search");
 
 
 
-// ==========================
-// ANIME SEITE
-// ==========================
 
+    if(search){
 
-const title =
-document.getElementById("title");
 
 
+        search.addEventListener(
+        "input",
+        function(){
 
-if(title){
 
 
+            const value =
+            this.value.toLowerCase();
 
-    let id =
-    localStorage.getItem("selectedAnime");
 
 
 
-    if(typeof animeList !== "undefined"
-    && animeList[id]){
+            document
+            .querySelectorAll(".card")
+            .forEach(card=>{
 
 
-        let anime =
-        animeList[id];
 
+                const name =
+                card.innerText.toLowerCase();
 
 
-        document.getElementById("cover").src =
-        anime.cover;
 
+                if(name.includes(value)){
 
 
-        document.getElementById("title").innerText =
-        anime.name;
+                    card.style.display="block";
 
 
+                }
 
-        document.getElementById("description").innerText =
-        anime.description || "";
+                else{
 
 
+                    card.style.display="none";
 
-        const seasons =
-        document.getElementById("seasons");
 
-
-
-        seasons.innerHTML =
-        "<h2>Staffeln</h2>";
-
-
-
-
-        anime.seasons.forEach(season=>{
-
-
-            let box =
-            document.createElement("div");
-
-
-            box.className="season";
-
-
-
-            box.innerHTML =
-            `<h3>Staffel ${season.number}</h3>`;
-
-
-
-
-            season.episodes.forEach(ep=>{
-
-
-                let btn =
-                document.createElement("button");
-
-
-                btn.innerText =
-                "Folge " + ep.number;
-
-
-
-                btn.onclick=function(){
-
-
-                    localStorage.setItem(
-                    "stream",
-                    ep.streamtape
-                    );
-
-
-                    localStorage.setItem(
-                    "episode",
-                    anime.name +
-                    " - Folge " +
-                    ep.number
-                    );
-
-
-                    window.location.href =
-                    "watch.html";
-
-
-                };
-
-
-
-                box.appendChild(btn);
+                }
 
 
 
             });
-
-
-
-            seasons.appendChild(box);
 
 
 
@@ -228,15 +192,193 @@ if(title){
     }
 
 
+
 }
 
 
 
 
 
-// ==========================
+
+// ===============================
+// ANIME SEITE
+// ===============================
+
+
+
+const animeTitle =
+document.getElementById("title");
+
+
+
+
+if(animeTitle){
+
+
+
+    const id =
+    localStorage.getItem("selectedAnime");
+
+
+
+
+    if(
+        typeof animeList !== "undefined"
+        &&
+        animeList[id]
+    ){
+
+
+
+        const anime =
+        animeList[id];
+
+
+
+
+        document.getElementById("cover").src =
+        anime.cover;
+
+
+
+
+        document.getElementById("title").innerText =
+        anime.name;
+
+
+
+
+        document.getElementById("description").innerText =
+        anime.description || "Keine Beschreibung vorhanden";
+
+
+
+
+
+        const seasonBox =
+        document.getElementById("seasons");
+
+
+
+        seasonBox.innerHTML =
+        `
+        <h2 class="section-title">
+        Staffeln
+        </h2>
+        `;
+
+
+
+
+
+        anime.seasons.forEach(season=>{
+
+
+
+            const seasonDiv =
+            document.createElement("div");
+
+
+
+            seasonDiv.className="season";
+
+
+
+
+            seasonDiv.innerHTML =
+
+            `
+            <h3>
+            Staffel ${season.number}
+            </h3>
+            `;
+
+
+
+
+
+
+            season.episodes.forEach(ep=>{
+
+
+
+                const button =
+                document.createElement("button");
+
+
+
+                button.innerText =
+                "Folge " + ep.number;
+
+
+
+
+                button.onclick=function(){
+
+
+
+                    localStorage.setItem(
+                        "stream",
+                        ep.streamtape
+                    );
+
+
+
+                    localStorage.setItem(
+                        "episode",
+                        anime.name +
+                        " - Staffel " +
+                        season.number +
+                        " Folge " +
+                        ep.number
+                    );
+
+
+
+
+                    window.location.href =
+                    "watch.html";
+
+
+
+                };
+
+
+
+
+                seasonDiv.appendChild(button);
+
+
+
+            });
+
+
+
+
+            seasonBox.appendChild(seasonDiv);
+
+
+
+        });
+
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
 // WATCH SEITE
-// ==========================
+// ===============================
 
 
 
@@ -245,28 +387,48 @@ document.getElementById("stream");
 
 
 
+
 if(player){
 
 
 
-    let stream =
+    const stream =
     localStorage.getItem("stream");
 
 
 
-    let episode =
+    const episode =
     localStorage.getItem("episode");
 
 
 
-    document.getElementById("episode-title")
-    .innerText =
-    episode;
+
+
+    const title =
+    document.getElementById("episode-title");
 
 
 
-    player.src =
-    stream;
+    if(title){
+
+
+        title.innerText =
+        episode || "Folge";
+
+
+    }
+
+
+
+
+    if(stream){
+
+
+        player.src = stream;
+
+
+    }
+
 
 
 
