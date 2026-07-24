@@ -1,77 +1,273 @@
-let shown = 0;
-
-const grid=document.getElementById("animeGrid");
-
-function loadAnime(){
-
-let amount=15;
+// AniStream Hauptscript
 
 
-animeList.slice(shown,shown+amount).forEach(anime=>{
+// ==========================
+// STARTSEITE
+// ==========================
 
 
-let card=document.createElement("div");
-
-card.className="card";
+const grid = document.getElementById("animeGrid");
 
 
-card.innerHTML=`
-
-<img src="${anime.image}">
-
-<h3>${anime.name}</h3>
-
-`;
+if(grid){
 
 
-card.onclick=()=>{
-
-window.location.href=anime.link;
-
-};
+    let shown = 0;
 
 
-grid.appendChild(card);
+    function loadAnime(){
 
 
-});
+        if(typeof animeList === "undefined"){
+            return;
+        }
 
 
-shown+=amount;
+
+        animeList.slice(shown, shown + 15).forEach((anime,index)=>{
+
+
+            let card = document.createElement("div");
+
+
+            card.className="card";
+
+
+            card.innerHTML = `
+
+            <img src="${anime.cover}">
+
+            <h3>${anime.name}</h3>
+
+            `;
+
+
+
+            card.onclick=function(){
+
+
+                localStorage.setItem(
+                    "selectedAnime",
+                    index
+                );
+
+
+                window.location.href="anime.html";
+
+
+            };
+
+
+            grid.appendChild(card);
+
+
+        });
+
+
+
+        shown +=15;
+
+
+    }
+
+
+
+    loadAnime();
+
+
+
+    const more =
+    document.getElementById("more");
+
+
+
+    if(more){
+
+
+        more.onclick=function(){
+
+            loadAnime();
+
+        };
+
+
+    }
+
+
 
 }
 
 
 
-loadAnime();
+
+
+// ==========================
+// ANIME SEITE
+// ==========================
+
+
+const title =
+document.getElementById("title");
 
 
 
-document.getElementById("more").onclick=()=>{
-
-loadAnime();
-
-};
+if(title){
 
 
 
-document.getElementById("search").oninput=function(){
+    let id =
+    localStorage.getItem("selectedAnime");
 
 
-let value=this.value.toLowerCase();
+
+    if(typeof animeList !== "undefined"
+    && animeList[id]){
 
 
-document.querySelectorAll(".card").forEach(card=>{
+        let anime =
+        animeList[id];
 
 
-card.style.display=
 
-card.innerText.toLowerCase().includes(value)
-
-?"block":"none";
+        document.getElementById("cover").src =
+        anime.cover;
 
 
-});
+
+        document.getElementById("title").innerText =
+        anime.name;
 
 
-};
+
+        document.getElementById("description").innerText =
+        anime.description || "";
+
+
+
+        const seasons =
+        document.getElementById("seasons");
+
+
+
+        seasons.innerHTML =
+        "<h2>Staffeln</h2>";
+
+
+
+
+        anime.seasons.forEach(season=>{
+
+
+            let box =
+            document.createElement("div");
+
+
+            box.className="season";
+
+
+
+            box.innerHTML =
+            `<h3>Staffel ${season.number}</h3>`;
+
+
+
+
+            season.episodes.forEach(ep=>{
+
+
+                let btn =
+                document.createElement("button");
+
+
+                btn.innerText =
+                "Folge " + ep.number;
+
+
+
+                btn.onclick=function(){
+
+
+                    localStorage.setItem(
+                    "stream",
+                    ep.streamtape
+                    );
+
+
+                    localStorage.setItem(
+                    "episode",
+                    anime.name +
+                    " - Folge " +
+                    ep.number
+                    );
+
+
+                    window.location.href =
+                    "watch.html";
+
+
+                };
+
+
+
+                box.appendChild(btn);
+
+
+
+            });
+
+
+
+            seasons.appendChild(box);
+
+
+
+        });
+
+
+
+    }
+
+
+}
+
+
+
+
+
+// ==========================
+// WATCH SEITE
+// ==========================
+
+
+
+const player =
+document.getElementById("stream");
+
+
+
+if(player){
+
+
+
+    let stream =
+    localStorage.getItem("stream");
+
+
+
+    let episode =
+    localStorage.getItem("episode");
+
+
+
+    document.getElementById("episode-title")
+    .innerText =
+    episode;
+
+
+
+    player.src =
+    stream;
+
+
+
+}
